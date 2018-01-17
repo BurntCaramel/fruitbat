@@ -11,7 +11,7 @@ import Char
 import Set
 import Dict exposing (Dict)
 import Parser exposing (..)
-import Parser.LanguageKit exposing (variable)
+import String.Extra exposing (..)
 
 
 type AttributeType
@@ -62,7 +62,7 @@ word =
 name : Parser String
 name =
     inContext "name" <|
-        succeed String.toLower
+        succeed String.Extra.underscored
             |= word
 
 
@@ -142,7 +142,7 @@ model : Parser Model
 model =
     inContext "model" <|
         succeed Model
-            -- |. ignore zeroOrMore isSpace
+            |. ignore zeroOrMore isSpace
             |= name
             |. ignore zeroOrMore isSpace
             |= attributes

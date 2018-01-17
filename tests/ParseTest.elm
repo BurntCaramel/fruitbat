@@ -75,9 +75,9 @@ suite =
                             (Ok [("first", Decimal), ("second", String)])
             , test "attributes with specified then implied types; spaces, uppercase names" <|
                 \_ ->
-                    run attributes "  FiRst:decimal SeConD  "
+                    run attributes "  first_thing:decimal SecondThing  "
                         |> Expect.equal
-                            (Ok [("first", Decimal), ("second", String)])
+                            (Ok [("first_thing", Decimal), ("second_thing", String)])
             , test "attributes with implied then specified types" <|
                 \_ ->
                     run attributes "first second:decimal"
@@ -121,7 +121,7 @@ suite =
                             )
             , test "model with attributes; capitalized name" <|
                 \_ ->
-                    run model "Photo image_url description:text"
+                    run model "   Photo image_url description:text   "
                         |> Expect.equal
                             (Ok { name = "photo"
                                 , attributes =
@@ -132,9 +132,20 @@ suite =
                             )
             , test "model with attributes; all caps name" <|
                 \_ ->
-                    run model "PHOTO image_url description:text"
+                    run model "   PHOTO image_url description:text   "
                         |> Expect.equal
                             (Ok { name = "photo"
+                                , attributes =
+                                    [ ("image_url", String)
+                                    , ("description", Text)
+                                    ]
+                                }
+                            )
+            , test "model with attributes; camel case name" <|
+                \_ ->
+                    run model "   MediaPhoto image_url description:text   "
+                        |> Expect.equal
+                            (Ok { name = "media_photo"
                                 , attributes =
                                     [ ("image_url", String)
                                     , ("description", Text)
