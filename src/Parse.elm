@@ -1,14 +1,15 @@
 module Parse exposing
     ( AttributeType(..)
-    , Model
+    , ModelDefinition
+    , Scaffold
     , attribute
     , attributes
     , model
+    , parseScaffold
     )
 
 import String
 import Char
-import Set
 import Dict exposing (Dict)
 import Parser exposing (..)
 import String.Extra exposing (..)
@@ -27,10 +28,14 @@ type AttributeType
   | Binary
 
 
-type alias Model =
+type alias ModelDefinition =
     { name : String
     , attributes: List (String, AttributeType)
     }
+
+
+type Scaffold =
+    Model ModelDefinition
 
 
 isSpace : Char -> Bool
@@ -138,11 +143,21 @@ attributes =
             |= attributesHelp []
 
 
-model : Parser Model
+model : Parser ModelDefinition
 model =
     inContext "model" <|
-        succeed Model
+        succeed ModelDefinition
             |. ignore zeroOrMore isSpace
             |= name
             |. ignore zeroOrMore isSpace
             |= attributes
+
+
+parseScaffold : String -> Result Parser.Error Scaffold
+parseScaffold input =
+    let
+        scaffoldParser =
+            succeed Model
+                |= model
+    in
+        run scaffoldParser input

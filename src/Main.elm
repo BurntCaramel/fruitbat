@@ -1,35 +1,45 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
+import Parse exposing (parseScaffold)
 
 
+type alias Model =
+    { input : String
+    }
+
+
+model : Model
 model =
-    0
+    { input = ""
+    }
 
 
 type Message
-    = Increment
-    | Decrement
+    = ChangeInput String
 
 
+update : Message -> Model -> Model
 update msg model =
     case msg of
-        Increment ->
-            model + 3
-
-        Decrement ->
-            model - 1
+        ChangeInput newInput ->
+            { model | input = newInput }
 
 
+view : Model -> Html Message
 view model =
-    div []
-        [ button [ onClick Decrement ] [ text "-" ]
-        , text (toString model)
-        , button [ onClick Increment ] [ text "+" ]
-        ]
+    let
+        scaffold =
+            parseScaffold model.input
+    in
+        div []
+            [ input [ onInput ChangeInput ] [ text "-" ]
+            , text (toString scaffold)
+            ]
 
 
+main : Program Never Model Message
 main =
     beginnerProgram
         { model = model
