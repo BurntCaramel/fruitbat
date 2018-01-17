@@ -1,7 +1,7 @@
 module Parse exposing
     ( AttributeType(..)
     , ModelDefinition
-    , Scaffold
+    , Scaffold(..)
     , attribute
     , attributes
     , model
