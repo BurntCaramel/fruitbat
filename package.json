@@ -1,13 +1,24 @@
 {
   "name": "fruitbat",
-  "version": "0.1.0",
-  "main": "index.js",
-  "license": "MIT",
+  "version": "1.0.0",
+  "description": "Describe fruitbat here",
+  "private": true,
   "scripts": {
-    "dev": "parcel src/index.html"
+    "build": "nwb build-web-app",
+    "clean": "nwb clean-app",
+    "dev": "nwb serve-web-app --reload",
+    "test": "nwb test",
+    "test:coverage": "nwb test --coverage",
+    "test:watch": "nwb test --server"
   },
+  "dependencies": {},
   "devDependencies": {
-    "parcel-bundler": "^1.4.1",
-    "parcel-plugin-elm": "^0.1.2-alpha"
-  }
+    "elm": "^0.18.0",
+    "elm-webpack-loader": "^4.4.0",
+    "nwb": "0.21.x",
+    "tailwindcss": "^0.4.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": ""
 }

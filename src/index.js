@@ -1,6 +1,3 @@
-console.log('load')
+let app = document.querySelector('#app')
 
-import('./main.elm').then(Elm => {
-  var mountNode = document.getElementById('app')
-  var app = Elm.Main.embed(mountNode)
-})
+app.innerHTML = '<h2>Welcome to fruitbat</h2>'
