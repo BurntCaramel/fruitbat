@@ -3,13 +3,13 @@ module ParseTest exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
-import Parse exposing (AttributeType(..), attribute, attributes)
+import Parse exposing (AttributeType(..), attribute, attributes, model)
 import Parser exposing (run)
 
 
 suite : Test
 suite =
-    describe "attributes"
+    describe "parsing"
         [ describe "single attribute"
             [ test "attribute with string type" <|
                 \_ ->
@@ -73,6 +73,11 @@ suite =
                     run attributes "  first:decimal second  "
                         |> Expect.equal
                             (Ok [("first", Decimal), ("second", String)])
+            , test "attributes with specified then implied types; spaces, uppercase names" <|
+                \_ ->
+                    run attributes "  FiRst:decimal SeConD  "
+                        |> Expect.equal
+                            (Ok [("first", Decimal), ("second", String)])
             , test "attributes with implied then specified types" <|
                 \_ ->
                     run attributes "first second:decimal"
@@ -93,5 +98,48 @@ suite =
                     run attributes "   "
                         |> Expect.equal
                             (Ok [])
+            ]
+        , describe "model"
+            [ test "model with no attributes" <|
+                \_ ->
+                    run model "photo"
+                        |> Expect.equal
+                            (Ok { name = "photo"
+                                , attributes = []
+                                }
+                            )
+            , test "model with attributes" <|
+                \_ ->
+                    run model "photo image_url description:text"
+                        |> Expect.equal
+                            (Ok { name = "photo"
+                                , attributes =
+                                    [ ("image_url", String)
+                                    , ("description", Text)
+                                    ]
+                                }
+                            )
+            , test "model with attributes; capitalized name" <|
+                \_ ->
+                    run model "Photo image_url description:text"
+                        |> Expect.equal
+                            (Ok { name = "photo"
+                                , attributes =
+                                    [ ("image_url", String)
+                                    , ("description", Text)
+                                    ]
+                                }
+                            )
+            , test "model with attributes; all caps name" <|
+                \_ ->
+                    run model "PHOTO image_url description:text"
+                        |> Expect.equal
+                            (Ok { name = "photo"
+                                , attributes =
+                                    [ ("image_url", String)
+                                    , ("description", Text)
+                                    ]
+                                }
+                            )
             ]
         ]

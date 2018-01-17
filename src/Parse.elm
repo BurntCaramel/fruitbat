@@ -1,7 +1,9 @@
 module Parse exposing
     ( AttributeType(..)
+    , Model
     , attribute
     , attributes
+    , model
     )
 
 import String
@@ -25,6 +27,12 @@ type AttributeType
   | Binary
 
 
+type alias Model =
+    { name : String
+    , attributes: List (String, AttributeType)
+    }
+
+
 isSpace : Char -> Bool
 isSpace c =
     c == ' '
@@ -44,25 +52,18 @@ isWordChar c =
         || c == '_'
 
 
-spaces : Parser ()
-spaces =
-    ignore oneOrMore isSpace
-
-
-optionalSpaces : Parser ()
-optionalSpaces =
-    ignore zeroOrMore isSpace
-
-
 word : Parser String
 word =
-    variable isWordHeadChar isWordChar Set.empty
+    source <|
+        ignore (Exactly 1) isWordHeadChar
+            |. ignore zeroOrMore isWordChar
 
 
-modelName : Parser String
-modelName =
-    inContext "model name" <|
-        word
+name : Parser String
+name =
+    inContext "name" <|
+        succeed String.toLower
+            |= word
 
 
 attributeTypeStrings : Dict String AttributeType
@@ -110,7 +111,7 @@ attributeType =
 attribute : Parser (String, AttributeType)
 attribute =
     succeed (,)
-        |= word
+        |= name
         |= oneOf
             [ succeed identity
                 |. symbol ":"
@@ -123,9 +124,9 @@ attributesHelp : List (String, AttributeType) -> Parser (List (String, Attribute
 attributesHelp revAttributes =
     oneOf
         [ attribute
-            |. optionalSpaces
+            |. ignore zeroOrMore isSpace
             |> andThen (\a -> attributesHelp (a :: revAttributes))
-        , succeed (List.reverse revAttributes)
+        , lazy (\_ -> succeed (List.reverse revAttributes))
         ]
 
 
@@ -133,6 +134,15 @@ attributes : Parser (List (String, AttributeType))
 attributes =
     inContext "attributes" <|
         succeed identity
-            |. optionalSpaces
+            |. ignore zeroOrMore isSpace
             |= attributesHelp []
 
+
+model : Parser Model
+model =
+    inContext "model" <|
+        succeed Model
+            -- |. ignore zeroOrMore isSpace
+            |= name
+            |. ignore zeroOrMore isSpace
+            |= attributes
