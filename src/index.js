@@ -1,3 +1,5 @@
-let app = document.querySelector('#app')
+import Elm from './Main.elm'
+import './main.css'
 
-app.innerHTML = '<h2>Welcome to fruitbat</h2>'
+var mountNode = document.getElementById('app')
+var app = Elm.Main.embed(mountNode)

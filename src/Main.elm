@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onInput)
 import Parse exposing (parseScaffold)
 
@@ -34,7 +35,7 @@ view model =
             parseScaffold model.input
     in
         div []
-            [ input [ onInput ChangeInput ] [ text "-" ]
+            [ input [ class "w-full", onInput ChangeInput ] [ text "-" ]
             , text (toString scaffold)
             ]
 

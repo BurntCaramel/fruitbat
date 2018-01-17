@@ -1,0 +1,11 @@
+@tailwind preflight;
+
+html {
+  font-size: 20px;
+}
+
+pre {
+  @apply .font-sans;
+}
+
+@tailwind utilities;
