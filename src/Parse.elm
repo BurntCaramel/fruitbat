@@ -28,6 +28,7 @@ type AttributeType
     | Timestamp
     | Date
     | DateTime
+    | Time
     | Binary
     | References
 
@@ -109,6 +110,7 @@ attributeTypeStringsTable =
     , ( "timestamp", Timestamp )
     , ( "date", Date )
     , ( "datetime", DateTime )
+    , ( "time", Time )
     , ( "binary", Binary )
     , ( "references", References )
     ]
@@ -208,7 +210,7 @@ attributes =
 model : Parser ModelDefinition
 model =
     let
-        tableName =
+        modelName =
             inContext "model name" <|
                 succeed identity
                     |. ignore oneOrMore isSpace
@@ -217,7 +219,7 @@ model =
         inContext "model" <|
             succeed ModelDefinition
                 |. keyword "model"
-                |= tableName
+                |= modelName
                 |= delayedCommit (ignore zeroOrMore isSpace) attributes
                 |. ignore zeroOrMore isSpace
 
