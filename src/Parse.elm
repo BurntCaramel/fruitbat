@@ -260,6 +260,8 @@ commands =
                 , succeed []
                     |. ignore zeroOrMore isSpace
                 ]
+            |. ignore zeroOrMore isNewline
+            |. end
 
 
 parseGenerateCommands : String -> Result Parser.Error (List GenerateCommand)

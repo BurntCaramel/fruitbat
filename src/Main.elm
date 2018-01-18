@@ -75,6 +75,9 @@ viewGenerateCommands generateCommands =
 suggestionsForContextDescription : String -> List String
 suggestionsForContextDescription name =
     case name of
+        "commands" ->
+            ["model [table name] [attributes…]"]
+        
         "generate command" ->
             ["model"]
         
