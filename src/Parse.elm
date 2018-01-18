@@ -1,13 +1,15 @@
-module Parse exposing
-    ( AttributeType(..)
-    , Attribute
-    , ModelDefinition
-    , GenerateCommand(..)
-    , attribute
-    , attributes
-    , model
-    , parseGenerateCommands
-    )
+module Parse
+    exposing
+        ( AttributeType(..)
+        , Attribute
+        , ModelDefinition
+        , GenerateCommand(..)
+        , attributeTypeStrings
+        , attribute
+        , attributes
+        , model
+        , parseGenerateCommands
+        )
 
 import String
 import Char
@@ -17,17 +19,17 @@ import String.Extra exposing (..)
 
 
 type AttributeType
-  = String
-  | Text
-  | Integer
-  | Decimal
-  | Float
-  | Boolean
-  | Timestamp
-  | Date
-  | DateTime
-  | Binary
-  | References
+    = String
+    | Text
+    | Integer
+    | Decimal
+    | Float
+    | Boolean
+    | Timestamp
+    | Date
+    | DateTime
+    | Binary
+    | References
 
 
 type alias Attribute =
@@ -42,19 +44,19 @@ columnNameForAttribute attribute =
     case attribute.type_ of
         References ->
             attribute.name ++ "_id"
-        
+
         _ ->
             attribute.name
 
 
 type alias ModelDefinition =
     { name : String
-    , attributes: List Attribute
+    , attributes : List Attribute
     }
 
 
-type GenerateCommand =
-    Model ModelDefinition
+type GenerateCommand
+    = Model ModelDefinition
 
 
 isSpace : Char -> Bool
@@ -78,7 +80,8 @@ isWordChar c =
     Char.isLower c
         || Char.isUpper c
         || Char.isDigit c
-        || c == '_'
+        || c
+        == '_'
 
 
 word : Parser String
@@ -90,31 +93,41 @@ word =
 
 name : Parser String
 name =
-    inContext "name" <|
+    -- inContext "name" <|
         succeed String.Extra.underscored
             |= word
 
 
-attributeTypeStrings : Dict String AttributeType
+attributeTypeStringsTable : List ( String, AttributeType )
+attributeTypeStringsTable =
+    [ ( "string", String )
+    , ( "text", Text )
+    , ( "integer", Integer )
+    , ( "decimal", Decimal )
+    , ( "float", Float )
+    , ( "boolean", Boolean )
+    , ( "timestamp", Timestamp )
+    , ( "date", Date )
+    , ( "datetime", DateTime )
+    , ( "binary", Binary )
+    , ( "references", References )
+    ]
+
+
+attributeTypeStrings : List String
 attributeTypeStrings =
-    Dict.fromList
-        [ ("string", String)
-        , ("text", Text)
-        , ("integer", Integer)
-        , ("decimal", Decimal)
-        , ("float", Float)
-        , ("boolean", Boolean)
-        , ("timestamp", Timestamp)
-        , ("date", Date)
-        , ("datetime", DateTime)
-        , ("binary", Binary)
-        , ("references", References)
-        ]
+    attributeTypeStringsTable
+        |> List.map Tuple.first
+
+
+attributeTypeStringsDict : Dict String AttributeType
+attributeTypeStringsDict =
+    Dict.fromList attributeTypeStringsTable
 
 
 attributeTypeFromString : String -> Maybe AttributeType
 attributeTypeFromString s =
-    Dict.get (String.toLower s) attributeTypeStrings
+    Dict.get (String.toLower s) attributeTypeStringsDict
 
 
 attributeType : Parser AttributeType
@@ -125,10 +138,10 @@ attributeType =
             case attributeTypeFromString s of
                 Just attributeType ->
                     succeed attributeType
-                
+
                 Nothing ->
                     fail ("Invalid attribute type: " ++ s)
-        
+
         parser : Parser AttributeType
         parser =
             succeed identity
@@ -191,23 +204,30 @@ attributes =
 
 model : Parser ModelDefinition
 model =
-    inContext "model" <|
-        succeed ModelDefinition
-            |. ignore zeroOrMore isSpace
-            |= name
-            |= delayedCommit (ignore zeroOrMore isSpace) attributes
-            |. ignore zeroOrMore isSpace
+    let
+        tableName =
+            inContext "table name" <|
+                succeed identity
+                    |. ignore zeroOrMore isSpace
+                    |= name
+    in
+        inContext "model" <|
+            succeed ModelDefinition
+                |= tableName
+                |= delayedCommit (ignore zeroOrMore isSpace) attributes
+                |. ignore zeroOrMore isSpace
 
 
 generateCommand : Parser GenerateCommand
 generateCommand =
-    succeed identity
-        |= oneOf
-            [ succeed Model
-                |. keyword "model"
-                |. ignore oneOrMore isSpace
-                |= model
-            ]
+    inContext "generate command" <|
+        succeed identity
+            |= oneOf
+                [ succeed Model
+                    |. keyword "model"
+                    -- |. ignore oneOrMore isSpace
+                    |= model
+                ]
 
 
 nextCommand : Parser GenerateCommand
