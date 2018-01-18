@@ -88,7 +88,7 @@ view model =
     in
         div [ class "p-4 relative" ]
             [ textarea [ class "w-full p-0 leading-normal font-mono", rows 8, onInput ChangeInput ] [ text model.input ]
-            , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
+            -- , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
             , resultHtml
             ]
 
