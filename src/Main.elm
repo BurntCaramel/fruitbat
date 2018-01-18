@@ -151,7 +151,7 @@ view model =
                         ]
 
                 Err error ->
-                    div []
+                    div [ class "leading-normal" ]
                         [ viewGenerateCommandsError error
                         -- , text (toString error)
                         ]
