@@ -3,7 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, rows)
 import Html.Events exposing (onClick, onInput)
-import Parse exposing (AttributeType(..), ModelDefinition, GenerateCommand(..), parseGenerateCommands)
+import Parse exposing (AttributeType(..), Attribute, ModelDefinition, GenerateCommand(..), parseGenerateCommands)
 
 
 type alias Model =
@@ -30,17 +30,17 @@ update msg model =
             { model | input = newInput }
 
 
-viewAttribute : (String, AttributeType) -> Html Message
+viewAttribute : Parse.Attribute -> Html Message
 viewAttribute attribute =
     tr []
         [ td [ class "w-48 px-2 py-1 border border-blue-light" ]
-            [ text (attribute |> Tuple.first) ]
+            [ text (attribute.name) ]
         , td [ class "w-32 px-2 py-1 border border-blue-light" ]
-            [ text (attribute |> Tuple.second |> toString) ]
+            [ text (attribute.type_ |> toString) ]
         ]
 
 
-viewAttributes : List (String, AttributeType) -> Html Message
+viewAttributes : List Parse.Attribute -> Html Message
 viewAttributes attributes =
     table []
         [ tbody []

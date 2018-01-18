@@ -1,5 +1,6 @@
 module Parse exposing
     ( AttributeType(..)
+    , Attribute
     , ModelDefinition
     , GenerateCommand(..)
     , attribute
@@ -29,9 +30,26 @@ type AttributeType
   | References
 
 
+type alias Attribute =
+    { name : String
+    , type_ : AttributeType
+    , index : Bool
+    }
+
+
+columnNameForAttribute : Attribute -> String
+columnNameForAttribute attribute =
+    case attribute.type_ of
+        References ->
+            attribute.name ++ "_id"
+        
+        _ ->
+            attribute.name
+
+
 type alias ModelDefinition =
     { name : String
-    , attributes: List (String, AttributeType)
+    , attributes: List Attribute
     }
 
 
@@ -120,34 +138,55 @@ attributeType =
         inContext "attribute type" parser
 
 
-attribute : Parser (String, AttributeType)
+attributeIndex : Parser Bool
+attributeIndex =
+    oneOf
+        [ keyword "index"
+            |> map (\_ -> True)
+        , succeed False
+        ]
+
+
+attribute : Parser Attribute
 attribute =
-    succeed (,)
+    succeed Attribute
         |= name
         |= oneOf
-            [ succeed identity
-                |. symbol ":"
-                |= attributeType
+            [ delayedCommit (symbol ":") attributeType
             , succeed String
+            ]
+        |= oneOf
+            [ delayedCommit (symbol ":") attributeIndex
+            , succeed False
             ]
 
 
-attributesHelp : List (String, AttributeType) -> Parser (List (String, AttributeType))
+nextAttribute : Parser Attribute
+nextAttribute =
+    delayedCommit (ignore oneOrMore isSpace) <|
+        succeed identity
+            |= attribute
+
+
+attributesHelp : List Attribute -> Parser (List Attribute)
 attributesHelp revAttributes =
     oneOf
-        [ attribute
-            |. ignore zeroOrMore isSpace
+        [ nextAttribute
             |> andThen (\a -> attributesHelp (a :: revAttributes))
         , lazy (\_ -> succeed (List.reverse revAttributes))
         ]
 
 
-attributes : Parser (List (String, AttributeType))
+attributes : Parser (List Attribute)
 attributes =
     inContext "attributes" <|
         succeed identity
-            |. ignore zeroOrMore isSpace
-            |= attributesHelp []
+            |= oneOf
+                [ succeed identity
+                    |= andThen (\a -> attributesHelp [ a ]) attribute
+                , succeed []
+                    |. ignore zeroOrMore isSpace
+                ]
 
 
 model : Parser ModelDefinition
@@ -156,28 +195,32 @@ model =
         succeed ModelDefinition
             |. ignore zeroOrMore isSpace
             |= name
+            |= delayedCommit (ignore zeroOrMore isSpace) attributes
             |. ignore zeroOrMore isSpace
-            |= attributes
 
 
 generateCommand : Parser GenerateCommand
 generateCommand =
-    oneOf
-        [ succeed Model
-            |= model
-        ]
+    succeed identity
+        |= oneOf
+            [ succeed Model
+                |= model
+            ]
 
 
 nextCommand : Parser GenerateCommand
 nextCommand =
-    delayedCommit (ignore zeroOrMore isNewline) <|
-        generateCommand
+    delayedCommit (ignore oneOrMore isNewline) <|
+        succeed identity
+            |. ignore zeroOrMore isSpace
+            |= generateCommand
 
 
 commandsHelp : List GenerateCommand -> Parser (List GenerateCommand)
 commandsHelp revCommands =
     oneOf
         [ nextCommand
+            -- |. ignore oneOrMore isNewline
             |> andThen (\command -> commandsHelp (command :: revCommands))
         , succeed (List.reverse revCommands)
         ]
@@ -187,9 +230,14 @@ commands : Parser (List GenerateCommand)
 commands =
     inContext "commands" <|
         succeed identity
-            -- |= generateCommand
             |. ignore zeroOrMore isNewline
-            |= commandsHelp []
+            -- |= commandsHelp []
+            |= oneOf
+                [ succeed identity
+                    |= andThen (\c -> commandsHelp [ c ]) generateCommand
+                , succeed []
+                    |. ignore zeroOrMore isSpace
+                ]
 
 
 parseGenerateCommands : String -> Result Parser.Error (List GenerateCommand)
