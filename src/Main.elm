@@ -3,7 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, rows)
 import Html.Events exposing (onClick, onInput)
-import Parse exposing (AttributeType(..), ModelDefinition, Scaffold(..), parseScaffold)
+import Parse exposing (AttributeType(..), ModelDefinition, GenerateCommand(..), parseGenerateCommands)
 
 
 type alias Model =
@@ -13,7 +13,9 @@ type alias Model =
 
 model : Model
 model =
-    { input = ""
+    { input = """user email:string
+photo user:references description:text image_url:string
+"""
     }
 
 
@@ -31,9 +33,9 @@ update msg model =
 viewAttribute : (String, AttributeType) -> Html Message
 viewAttribute attribute =
     tr []
-        [ td [ class "border border-black" ]
+        [ td [ class "w-48 border border-blue-light" ]
             [ text (attribute |> Tuple.first) ]
-        , td [ class "border border-black" ]
+        , td [ class "w-32 border border-blue-light" ]
             [ text (attribute |> Tuple.second |> toString) ]
         ]
 
@@ -48,39 +50,45 @@ viewAttributes attributes =
 
 viewModelDefinition : ModelDefinition -> Html Message
 viewModelDefinition model =
-    div []
+    div [ class "mb-4" ]
         [ h2 [] [ text model.name ]
         , viewAttributes model.attributes
         ]
 
 
-viewScaffold : Scaffold -> Html Message
-viewScaffold scaffold =
-    case scaffold of
+viewGenerateCommand : GenerateCommand -> Html Message
+viewGenerateCommand generateCommand =
+    case generateCommand of
         Model model ->
             viewModelDefinition model
+
+
+viewGenerateCommands : List GenerateCommand -> Html Message
+viewGenerateCommands generateCommands =
+    div []
+        (List.map viewGenerateCommand generateCommands)
 
 
 view : Model -> Html Message
 view model =
     let
-        scaffoldResult =
-            parseScaffold model.input
+        generateCommandsResult =
+            parseGenerateCommands model.input
         
         resultHtml =
-            case scaffoldResult of
-                Ok scaffold ->
+            case generateCommandsResult of
+                Ok generateCommands ->
                     div []
-                        [ text (toString scaffold)
-                        , viewScaffold scaffold
+                        [ text ""--(toString generateCommands)
+                        , viewGenerateCommands generateCommands
                         ]
                 
                 Err error ->
-                    text "Error"
+                    text ("Error: " ++ (toString error))
     in
         div [ class "p-4 relative" ]
             [ textarea [ class "w-full p-0 leading-normal font-mono", rows 8, onInput ChangeInput ] [ text model.input ]
-            , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold", rows 8, onInput ChangeInput ] [ text model.input ]
+            , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
             , resultHtml
             ]
 

@@ -1,11 +1,11 @@
 module Parse exposing
     ( AttributeType(..)
     , ModelDefinition
-    , Scaffold(..)
+    , GenerateCommand(..)
     , attribute
     , attributes
     , model
-    , parseScaffold
+    , parseGenerateCommands
     )
 
 import String
@@ -26,6 +26,7 @@ type AttributeType
   | Date
   | DateTime
   | Binary
+  | References
 
 
 type alias ModelDefinition =
@@ -34,13 +35,18 @@ type alias ModelDefinition =
     }
 
 
-type Scaffold =
+type GenerateCommand =
     Model ModelDefinition
 
 
 isSpace : Char -> Bool
 isSpace c =
     c == ' '
+
+
+isNewline : Char -> Bool
+isNewline c =
+    c == '\n'
 
 
 isWordHeadChar : Char -> Bool
@@ -84,6 +90,7 @@ attributeTypeStrings =
         , ("date", Date)
         , ("datetime", DateTime)
         , ("binary", Binary)
+        , ("references", References)
         ]
 
 
@@ -153,11 +160,38 @@ model =
             |= attributes
 
 
-parseScaffold : String -> Result Parser.Error Scaffold
-parseScaffold input =
-    let
-        scaffoldParser =
-            succeed Model
-                |= model
-    in
-        run scaffoldParser input
+generateCommand : Parser GenerateCommand
+generateCommand =
+    oneOf
+        [ succeed Model
+            |= model
+        ]
+
+
+nextCommand : Parser GenerateCommand
+nextCommand =
+    delayedCommit (ignore zeroOrMore isNewline) <|
+        generateCommand
+
+
+commandsHelp : List GenerateCommand -> Parser (List GenerateCommand)
+commandsHelp revCommands =
+    oneOf
+        [ nextCommand
+            |> andThen (\command -> commandsHelp (command :: revCommands))
+        , succeed (List.reverse revCommands)
+        ]
+
+
+commands : Parser (List GenerateCommand)
+commands =
+    inContext "commands" <|
+        succeed identity
+            -- |= generateCommand
+            |. ignore zeroOrMore isNewline
+            |= commandsHelp []
+
+
+parseGenerateCommands : String -> Result Parser.Error (List GenerateCommand)
+parseGenerateCommands input =
+    run commands input
