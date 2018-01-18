@@ -33,9 +33,9 @@ update msg model =
 viewAttribute : (String, AttributeType) -> Html Message
 viewAttribute attribute =
     tr []
-        [ td [ class "w-48 border border-blue-light" ]
+        [ td [ class "w-48 px-2 py-1 border border-blue-light" ]
             [ text (attribute |> Tuple.first) ]
-        , td [ class "w-32 border border-blue-light" ]
+        , td [ class "w-32 px-2 py-1 border border-blue-light" ]
             [ text (attribute |> Tuple.second |> toString) ]
         ]
 
