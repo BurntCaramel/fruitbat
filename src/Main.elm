@@ -13,8 +13,8 @@ type alias Model =
 
 model : Model
 model =
-    { input = """user email:string
-photo user:references description:text image_url:string
+    { input = """model user email:string
+model photo user:references description:text image_url:string
 """
     }
 
@@ -87,7 +87,8 @@ view model =
                     text ("Error: " ++ (toString error))
     in
         div [ class "p-4 relative" ]
-            [ textarea [ class "w-full p-0 leading-normal font-mono", rows 8, onInput ChangeInput ] [ text model.input ]
+            [ h2 [] [ text "rails generate…" ]
+            , textarea [ class "w-full p-0 leading-normal font-mono", rows 8, onInput ChangeInput ] [ text model.input ]
             -- , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
             , resultHtml
             ]

@@ -204,6 +204,8 @@ generateCommand =
     succeed identity
         |= oneOf
             [ succeed Model
+                |. keyword "model"
+                |. ignore oneOrMore isSpace
                 |= model
             ]
 
