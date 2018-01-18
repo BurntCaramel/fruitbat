@@ -75,14 +75,17 @@ viewGenerateCommands generateCommands =
 suggestionsForContextDescription : String -> List String
 suggestionsForContextDescription name =
     case name of
-        "commands" ->
-            ["model [table name] [attributes…]"]
+        "command" ->
+            ["model [name] [attributes…]"]
         
         "generate command" ->
             ["model"]
         
         "attribute type" ->
             attributeTypeStrings
+        
+        "attribute index" ->
+            ["index"]
 
         _ ->
             []
@@ -93,6 +96,22 @@ viewGenerateCommandsError error =
     case error.context of
         context :: _ ->
             let
+                summaryHtml =
+                    case error.problem of
+                        Parser.ExpectingEnd ->
+                            div []
+                                [ text "Incomplete or invalid "
+                                , strong [] [ text context.description ]
+                                , text "."
+                                ]
+
+                        _ ->
+                            div []
+                                [ text "Invalid or missing "
+                                , strong [] [ text context.description ]
+                                , text "."
+                                ]
+
                 suggestions =
                     suggestionsForContextDescription context.description
                 
@@ -109,9 +128,7 @@ viewGenerateCommandsError error =
                         ]
             in
                 div []
-                    [ text "Invalid or missing "
-                    , strong [] [ text context.description ]
-                    , text "."
+                    [ summaryHtml
                     , div [] suggestionsHtml
                     ]
 
@@ -134,7 +151,10 @@ view model =
                         ]
 
                 Err error ->
-                    viewGenerateCommandsError error
+                    div []
+                        [ viewGenerateCommandsError error
+                        -- , text (toString error)
+                        ]
     in
         div [ class "p-4 relative" ]
             [ h2 [] [ text "rails generate…" ]

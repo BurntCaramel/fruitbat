@@ -148,16 +148,13 @@ attributeType =
                 |= word
                 |> andThen fromString
     in
-        inContext "attribute type" parser
+        parser
 
 
 attributeIndex : Parser Bool
 attributeIndex =
-    oneOf
-        [ keyword "index"
-            |> map (\_ -> True)
-        , succeed False
-        ]
+    keyword "index"
+        |> map (\_ -> True)
 
 
 attribute : Parser Attribute
@@ -165,12 +162,18 @@ attribute =
     succeed Attribute
         |= name
         |= oneOf
-            [ delayedCommit (symbol ":") attributeType
-            , succeed String
+            [ succeed identity
+                |. symbol ":"
+                |= attributeType
+                |> inContext "attribute type"
+            , succeed String -- default type
             ]
         |= oneOf
-            [ delayedCommit (symbol ":") attributeIndex
-            , succeed False
+            [ succeed identity
+                |. symbol ":"
+                |= attributeIndex
+                |> inContext "attribute index"
+            , succeed False -- default index
             ]
 
 
@@ -206,13 +209,14 @@ model : Parser ModelDefinition
 model =
     let
         tableName =
-            inContext "table name" <|
+            inContext "model name" <|
                 succeed identity
-                    |. ignore zeroOrMore isSpace
+                    |. ignore oneOrMore isSpace
                     |= name
     in
         inContext "model" <|
             succeed ModelDefinition
+                |. keyword "model"
                 |= tableName
                 |= delayedCommit (ignore zeroOrMore isSpace) attributes
                 |. ignore zeroOrMore isSpace
@@ -224,8 +228,6 @@ generateCommand =
         succeed identity
             |= oneOf
                 [ succeed Model
-                    |. keyword "model"
-                    -- |. ignore oneOrMore isSpace
                     |= model
                 ]
 
@@ -238,11 +240,11 @@ nextCommand =
             |= generateCommand
 
 
+
 commandsHelp : List GenerateCommand -> Parser (List GenerateCommand)
 commandsHelp revCommands =
     oneOf
         [ nextCommand
-            -- |. ignore oneOrMore isNewline
             |> andThen (\command -> commandsHelp (command :: revCommands))
         , succeed (List.reverse revCommands)
         ]
@@ -250,10 +252,9 @@ commandsHelp revCommands =
 
 commands : Parser (List GenerateCommand)
 commands =
-    inContext "commands" <|
+    inContext "command" <|
         succeed identity
             |. ignore zeroOrMore isNewline
-            -- |= commandsHelp []
             |= oneOf
                 [ succeed identity
                     |= andThen (\c -> commandsHelp [ c ]) generateCommand
