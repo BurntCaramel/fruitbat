@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, rows)
+import Html.Attributes exposing (class, href, rows)
 import Html.Events exposing (onClick, onInput)
 import Parse exposing (AttributeType(..), Attribute, ModelDefinition, GenerateCommand(..), attributeTypeStrings, parseGenerateCommands)
 import Inflexio.Pluralize exposing (singularize, pluralize)
@@ -45,7 +45,7 @@ viewAttribute attribute =
                     "bg-blue border-blue-light"
     in
         tr [ class "leading-base" ]
-            [ td [ class "w-48 px-2 py-1 border border-blue-light bg-blue-lightest" ]
+            [ td [ class "w-48 px-2 py-1 text-blue-darkest bg-blue-lightest border border-blue-light" ]
                 [ text (attribute.name) ]
             , td [ class <| "w-48 px-2 py-1 border text-white " ++ typeClass ]
                 [ text (attribute.type_ |> toString)
@@ -54,13 +54,16 @@ viewAttribute attribute =
                 else
                     text ""
                 ]
-            , td [ class "w-16 pl-2 py-1 text-sm border border-blue-light bg-blue-lightest" ]
-                [ text <|
-                    if attribute.index then
-                        "indexed"
-                    else
-                        ""
-                ]
+            , if attribute.index then
+                td [ class "w-16 pl-2 py-1 text-sm text-white bg-grey-darkest border border-grey-darkest" ]
+                    [ text <|
+                        if attribute.index then
+                            "indexed"
+                        else
+                            ""
+                    ]
+            else
+                text ""
             ]
 
 
@@ -182,12 +185,20 @@ view model =
                         -- , text (toString error)
                         ]
     in
-        div [ class "p-4 relative" ]
-            [ h2 [] [ text "rails generate…" ]
-            , textarea [ class "w-full p-2 leading-normal font-mono bg-purple-lightest", rows 8, onInput ChangeInput ] [ text model.input ]
+        section []
+            [ nav [ class "flex justify-between px-4 py-1 text-black bg-grey-lighter" ]
+                [ h1 [ class "text-lg" ] [ text "Fruitbat 🦇" ]
+                , div [ class "text-sm leading-normal" ]
+                    [ a [ href "https://github.com/RoyalIcing/fruitbat" ] [ text "GitHub" ]
+                    ]
+                ]
+            , div [ class "p-4 relative" ]
+                [ h2 [ class "text-grey-darker" ] [ text "rails generate…" ]
+                , textarea [ class "w-full p-2 mb-4 leading-normal font-mono bg-purple-lightest", rows 8, onInput ChangeInput ] [ text model.input ]
 
-            -- , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
-            , resultHtml
+                -- , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
+                , resultHtml
+                ]
             ]
 
 

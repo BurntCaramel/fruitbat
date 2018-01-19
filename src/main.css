@@ -4,6 +4,13 @@ html {
   font-size: 20px;
 }
 
+nav a {
+  @apply .font-bold .no-underline .text-blue-dark;
+}
+nav a:hover {
+  @apply .font-bold .underline;
+}
+
 table {
   border-collapse: collapse;
 }
