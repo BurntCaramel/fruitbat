@@ -44,9 +44,11 @@ viewAttribute attribute =
                 strong [] [ text <| " " ++ pluralize attribute.name ]
               else
                 text ""
-            , text <|
+            ]
+        , td [ class "w-12 px-2 py-1 border border-blue-light bg-blue-lightest" ]
+            [ text <|
                 if attribute.index then
-                    "*"
+                    "index"
                 else
                     ""
             ]
