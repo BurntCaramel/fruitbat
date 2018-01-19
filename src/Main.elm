@@ -4,6 +4,8 @@ import Html exposing (..)
 import Html.Attributes exposing (class, rows)
 import Html.Events exposing (onClick, onInput)
 import Parse exposing (AttributeType(..), Attribute, ModelDefinition, GenerateCommand(..), attributeTypeStrings, parseGenerateCommands)
+import Inflexio.Pluralize exposing (singularize, pluralize)
+import String.Extra exposing (classify)
 import Parser
 
 
@@ -36,9 +38,17 @@ viewAttribute attribute =
     tr []
         [ td [ class "w-48 px-2 py-1 border border-blue-light bg-blue-lightest" ]
             [ text (attribute.name) ]
-        , td [ class "w-32 px-2 py-1 border border-blue-light text-white bg-blue" ]
+        , td [ class "w-48 px-2 py-1 border border-blue-light text-white bg-blue" ]
             [ text (attribute.type_ |> toString)
-            , text (if attribute.index then "*" else "")
+            , if attribute.type_ == References then
+                strong [] [ text <| " " ++ pluralize attribute.name ]
+              else
+                text ""
+            , text <|
+                if attribute.index then
+                    "*"
+                else
+                    ""
             ]
         ]
 
@@ -54,7 +64,11 @@ viewAttributes attributes =
 viewModelDefinition : ModelDefinition -> Html Message
 viewModelDefinition model =
     div [ class "mb-4" ]
-        [ h2 [ class "mb-1" ] [ text model.name ]
+        [ h2 [ class "mb-1" ]
+            [ text <| pluralize <| model.name
+            , text " "
+            , text <| classify <| singularize <| model.name
+            ]
         , viewAttributes model.attributes
         ]
 
@@ -76,16 +90,16 @@ suggestionsForContextDescription : String -> List String
 suggestionsForContextDescription name =
     case name of
         "command" ->
-            ["model [name] [attributes…]"]
-        
+            [ "model [name] [attributes…]" ]
+
         "generate command" ->
-            ["model"]
-        
+            [ "model" ]
+
         "attribute type" ->
             attributeTypeStrings
-        
+
         "attribute index" ->
-            ["index"]
+            [ "index" ]
 
         _ ->
             []
@@ -114,7 +128,7 @@ viewGenerateCommandsError error =
 
                 suggestions =
                     suggestionsForContextDescription context.description
-                
+
                 suggestionsHtml =
                     if List.isEmpty suggestions then
                         []
@@ -153,6 +167,7 @@ view model =
                 Err error ->
                     div [ class "leading-normal" ]
                         [ viewGenerateCommandsError error
+
                         -- , text (toString error)
                         ]
     in

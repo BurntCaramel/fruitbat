@@ -95,8 +95,8 @@ word =
 name : Parser String
 name =
     -- inContext "name" <|
-        succeed String.Extra.underscored
-            |= word
+    succeed String.Extra.underscored
+        |= word
 
 
 attributeTypeStringsTable : List ( String, AttributeType )
@@ -240,7 +240,6 @@ nextCommand =
         succeed identity
             |. ignore zeroOrMore isSpace
             |= generateCommand
-
 
 
 commandsHelp : List GenerateCommand -> Parser (List GenerateCommand)
