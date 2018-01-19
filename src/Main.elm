@@ -35,24 +35,33 @@ update msg model =
 
 viewAttribute : Parse.Attribute -> Html Message
 viewAttribute attribute =
-    tr []
-        [ td [ class "w-48 px-2 py-1 border border-blue-light bg-blue-lightest" ]
-            [ text (attribute.name) ]
-        , td [ class "w-48 px-2 py-1 border border-blue-light text-white bg-blue" ]
-            [ text (attribute.type_ |> toString)
-            , if attribute.type_ == References then
-                strong [] [ text <| " " ++ pluralize attribute.name ]
-              else
-                text ""
-            ]
-        , td [ class "w-12 px-2 py-1 border border-blue-light bg-blue-lightest" ]
-            [ text <|
-                if attribute.index then
-                    "index"
+    let
+        typeClass =
+            case attribute.type_ of
+                References ->
+                    "bg-purple border-purple-light"
+                
+                _ ->
+                    "bg-blue border-blue-light"
+    in
+        tr [ class "leading-base" ]
+            [ td [ class "w-48 px-2 py-1 border border-blue-light bg-blue-lightest" ]
+                [ text (attribute.name) ]
+            , td [ class <| "w-48 px-2 py-1 border text-white " ++ typeClass ]
+                [ text (attribute.type_ |> toString)
+                , if attribute.type_ == References then
+                    strong [] [ text <| " " ++ pluralize attribute.name ]
                 else
-                    ""
+                    text ""
+                ]
+            , td [ class "w-12 px-2 py-1 border border-blue-light bg-blue-lightest" ]
+                [ text <|
+                    if attribute.index then
+                        "index"
+                    else
+                        ""
+                ]
             ]
-        ]
 
 
 viewAttributes : List Parse.Attribute -> Html Message
