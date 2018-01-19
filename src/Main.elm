@@ -54,10 +54,10 @@ viewAttribute attribute =
                 else
                     text ""
                 ]
-            , td [ class "w-12 px-2 py-1 border border-blue-light bg-blue-lightest" ]
+            , td [ class "w-16 pl-2 py-1 text-sm border border-blue-light bg-blue-lightest" ]
                 [ text <|
                     if attribute.index then
-                        "index"
+                        "indexed"
                     else
                         ""
                 ]
