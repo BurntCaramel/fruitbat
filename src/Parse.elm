@@ -15,7 +15,7 @@ import String
 import Char
 import Dict exposing (Dict)
 import Parser exposing (..)
-import String.Extra exposing (..)
+import String.Extra
 
 
 type AttributeType
@@ -94,7 +94,6 @@ word =
 
 name : Parser String
 name =
-    -- inContext "name" <|
     succeed String.Extra.underscored
         |= word
 
@@ -177,6 +176,15 @@ attribute =
                 |> inContext "attribute index"
             , succeed False -- default index
             ]
+        |> map
+            (\a ->
+                case a.type_ of
+                    References ->
+                        { a | index = True }
+
+                    _ ->
+                        a
+            )
 
 
 nextAttribute : Parser Attribute

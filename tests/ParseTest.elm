@@ -88,6 +88,24 @@ suite =
                                 , { name = "second", type_ = Decimal, index = False }
                                 ]
                             )
+            , test "attributes with index" <|
+                \_ ->
+                    run attributes "first:string:index second:decimal:index"
+                        |> Expect.equal
+                            (Ok
+                                [ { name = "first", type_ = String, index = True }
+                                , { name = "second", type_ = Decimal, index = True }
+                                ]
+                            )
+            , test "attributes with references" <|
+                \_ ->
+                    run attributes "first:references second:references"
+                        |> Expect.equal
+                            (Ok
+                                [ { name = "first", type_ = References, index = True }
+                                , { name = "second", type_ = References, index = True }
+                                ]
+                            )
             , test "no attributes" <|
                 \_ ->
                     run attributes ""
@@ -97,7 +115,7 @@ suite =
         , describe "model"
             [ test "model with no attributes" <|
                 \_ ->
-                    run model "photo"
+                    run model "model photo"
                         |> Expect.equal
                             (Ok { name = "photo"
                                 , attributes = []
@@ -105,7 +123,7 @@ suite =
                             )
             , test "model with attributes" <|
                 \_ ->
-                    run model "photo image_url description:text"
+                    run model "model photo image_url description:text"
                         |> Expect.equal
                             (Ok { name = "photo"
                                 , attributes =
@@ -116,7 +134,7 @@ suite =
                             )
             , test "model with attributes; capitalized name" <|
                 \_ ->
-                    run model "   Photo image_url description:text   "
+                    run model "model Photo image_url description:text   "
                         |> Expect.equal
                             (Ok { name = "photo"
                                 , attributes =
@@ -127,7 +145,7 @@ suite =
                             )
             , test "model with attributes; all caps name" <|
                 \_ ->
-                    run model "   PHOTO image_url description:text   "
+                    run model "model PHOTO image_url description:text   "
                         |> Expect.equal
                             (Ok { name = "photo"
                                 , attributes =
@@ -138,7 +156,7 @@ suite =
                             )
             , test "model with attributes; camel case name" <|
                 \_ ->
-                    run model "   MediaPhoto image_url description:text   "
+                    run model "model MediaPhoto image_url description:text   "
                         |> Expect.equal
                             (Ok { name = "media_photo"
                                 , attributes =
