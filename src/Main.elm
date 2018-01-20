@@ -80,8 +80,6 @@ viewModelDefinition model =
     div [ class "mb-4" ]
         [ h2 [ class "mb-1" ]
             [ text <| pluralize <| model.name
-            , text " "
-            , text <| classify <| singularize <| model.name
             ]
         , viewAttributes model.attributes
         ]
@@ -98,6 +96,58 @@ viewGenerateCommands : List GenerateCommand -> Html Message
 viewGenerateCommands generateCommands =
     div []
         (List.map viewGenerateCommand generateCommands)
+
+
+codeForAttribute : Parse.Attribute -> Maybe String
+codeForAttribute attribute =
+    case attribute.type_ of
+        References ->
+            Just <| "  belongs_to :" ++ attribute.name
+        
+        _ ->
+            Nothing
+
+
+viewAppCodeForModel : ModelDefinition -> Html Message
+viewAppCodeForModel model =
+    let
+        className =
+            model.name
+                |> singularize
+                |> classify
+        
+        codeLines =
+            List.filterMap codeForAttribute model.attributes
+    in
+        
+    div []
+        [ h3 [ class "mt-1" ]
+            [ text <| className ++ ".rb" ]
+        , textarea [ rows 4, class "w-full p-2 mb-4 leading-normal font-mono bg-red-lightest" ]
+            [ text <|
+                "class " ++ className ++ " < ApplicationRecord" ++ "\n"
+                ++ String.join "\n" codeLines ++ "\n"
+                ++ "end"
+            ]
+        ]
+
+
+viewAppCodeSection : List GenerateCommand -> Html Message
+viewAppCodeSection generateCommands =
+    let
+        models =
+            List.filterMap (\command ->
+                case command of
+                    Model model ->
+                        Just model
+            ) generateCommands
+    in
+        
+    div []
+        [ h2 [] [ text "app/models/" ]
+        , div [ class "pl-4" ]
+            (List.map viewAppCodeForModel models)
+        ]
 
 
 suggestionsForContextDescription : String -> List String
@@ -174,14 +224,13 @@ view model =
             case generateCommandsResult of
                 Ok generateCommands ->
                     div []
-                        [ text "" --(toString generateCommands)
-                        , viewGenerateCommands generateCommands
+                        [ viewGenerateCommands generateCommands
+                        , viewAppCodeSection generateCommands
                         ]
 
                 Err error ->
                     div [ class "leading-normal" ]
                         [ viewGenerateCommandsError error
-
                         -- , text (toString error)
                         ]
     in
@@ -194,7 +243,7 @@ view model =
                     ]
                 ]
             , div [ class "p-4 relative" ]
-                [ h2 [ class "text-grey-darker" ] [ text "rails generate…" ]
+                [ h2 [ class "" ] [ text "rails generate …" ]
                 , textarea [ class "w-full p-2 mb-4 leading-normal font-mono bg-purple-lightest", rows 8, onInput ChangeInput ] [ text model.input ]
 
                 -- , div [ class "absolute pin-t w-full pt-4 leading-normal font-mono font-bold whitespace-pre", rows 8, onInput ChangeInput ] [ text model.input ]
