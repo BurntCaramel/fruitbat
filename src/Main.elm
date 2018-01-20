@@ -186,10 +186,11 @@ view model =
                         ]
     in
         section []
-            [ nav [ class "flex justify-between px-4 py-1 text-black bg-grey-lighter" ]
+            [ nav [ class "flex justify-between px-4 py-1 text-black border-b border-grey-lighter" ]
                 [ h1 [ class "text-lg" ] [ text "Fruitbat 🦇" ]
                 , div [ class "text-sm leading-normal" ]
-                    [ a [ href "https://github.com/RoyalIcing/fruitbat" ] [ text "GitHub" ]
+                    [ a [ href "https://twitter.com/concreteniche" ] [ text "by @concreteniche" ]
+                    , a [ href "https://github.com/RoyalIcing/fruitbat" ] [ text "Fork on GitHub" ]
                     ]
                 ]
             , div [ class "p-4 relative" ]

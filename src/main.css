@@ -5,7 +5,7 @@ html {
 }
 
 nav a {
-  @apply .font-bold .no-underline .text-blue-dark;
+  @apply .px-2 .font-bold .no-underline .text-blue-dark;
 }
 nav a:hover {
   @apply .font-bold .underline;
