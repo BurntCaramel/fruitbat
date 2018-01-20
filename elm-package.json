@@ -1,6 +1,6 @@
 {
     "version": "0.1.0",
-    "summary": "helpful summary of your project, less than 80 characters",
+    "summary": "Visualize and verify your `rails generate model …` commands before you run them.",
     "repository": "https://github.com/RoyalIcing/fruitbat.git",
     "license": "BSD3",
     "source-directories": [

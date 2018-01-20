@@ -1,7 +1,7 @@
 {
   "name": "fruitbat",
   "version": "1.0.0",
-  "description": "Describe fruitbat here",
+  "description": "Visualize and verify your `rails generate model …` commands before you run them.",
   "private": true,
   "scripts": {
     "build": "nwb build-web-app",
