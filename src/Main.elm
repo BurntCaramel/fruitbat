@@ -118,15 +118,21 @@ viewAppCodeForModel model =
         
         codeLines =
             List.filterMap codeForAttribute model.attributes
+        
+        methodsCode =
+            if List.isEmpty codeLines then
+                ""
+            else
+                String.join "\n" codeLines ++ "\n"
     in
         
     div []
         [ h3 [ class "mt-1" ]
             [ text <| className ++ ".rb" ]
-        , textarea [ rows 4, class "w-full p-2 mb-4 leading-normal font-mono bg-red-lightest" ]
+        , textarea [ rows (List.length codeLines + 2), class "w-full p-2 mb-4 leading-normal font-mono bg-red-lightest" ]
             [ text <|
                 "class " ++ className ++ " < ApplicationRecord" ++ "\n"
-                ++ String.join "\n" codeLines ++ "\n"
+                ++ methodsCode
                 ++ "end"
             ]
         ]
