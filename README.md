@@ -1,6 +1,6 @@
 # fruitbat
 
-Describe fruitbat here.
+Visualize and verify your `rails generate model …` commands before you run them.
 
 
 ## Resources
